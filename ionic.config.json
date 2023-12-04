@@ -1,0 +1,7 @@
+{
+  "name": "Commander Tiles",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
