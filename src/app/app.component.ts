@@ -146,6 +146,7 @@ export class AppComponent {
     this.tileCount++;   
     var tile = { id: data.id, name: data.name, img: data.image_uris.art_crop, status: "enabled" } as CardTile;
     this.tiles.push(tile);
+    this.modal.dismiss(this.name, 'cancel');
   }
 
 
