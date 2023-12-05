@@ -9,6 +9,23 @@ ion-menu.md ion-content {
   --padding-bottom: 20px;
 }
 
+.grayscale {
+  -webkit-filter: grayscale(100%);
+  -moz-filter: grayscale(100%);
+  -ms-filter: grayscale(100%);
+  -o-filter: grayscale(100%);
+  filter: grayscale(100%);
+  -webkit-transition: -webkit-filter ease 1s;
+  -moz-transition: -moz-filter ease 1s;
+  -ms-transition: -ms-filter ease 1s;
+  -o-transition: -o-filter ease 1s;
+  transition: filter ease 1s;
+}
+
+ion-router-outlet{
+  background-color: black;
+}
+
 ion-menu.md ion-list {
   padding: 20px 0;
 }

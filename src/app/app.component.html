@@ -1,29 +1,56 @@
 <ion-app>
-  <ion-split-pane contentId="main-content">
-    <ion-menu contentId="main-content" type="overlay">
-      <ion-content>
-        <ion-list id="inbox-list">
-          <ion-list-header>Inbox</ion-list-header>
-          <ion-note>hi&#64;ionicframework.com</ion-note>
-
-          <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
-            <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
-              <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-              <ion-label>{{ p.title }}</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-        </ion-list>
-
-        <ion-list id="labels-list">
-          <ion-list-header>Labels</ion-list-header>
-
-          <ion-item *ngFor="let label of labels" lines="none">
-            <ion-icon aria-hidden="true" slot="start" ios="bookmark-outline" md="bookmark-sharp"></ion-icon>
-            <ion-label>{{ label }}</ion-label>
+  <ion-content contentId="main-content">    
+    <ion-router-outlet id="main-content">
+      <div id="loading" [style.display]="loading ? 'display' : 'none'">
+        <img src="../../assets/loading.gif">
+      </div>
+      <div id="content" style="display: none;">
+        <ion-button id="open-modal" expand="block">Add Tile</ion-button>
+      </div>
+      <ion-grid id="grid">        
+        <ion-row *ngIf="!isMobile">
+          <ion-col size="3"></ion-col>
+          <ion-col size="3"></ion-col>
+          <ion-col size="3"></ion-col>
+          <ion-col size="3"></ion-col>
+        </ion-row>
+        <ion-row *ngIf="isMobile">
+          <ion-col size="6"></ion-col>
+          <ion-col size="6"></ion-col>          
+        </ion-row>
+      </ion-grid>
+    </ion-router-outlet>
+  </ion-content>
+  <ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="cancel()">Cancel</ion-button>
+          </ion-buttons>
+          <ion-title>Welcome</ion-title>
+          <ion-buttons slot="end">
+            <!-- <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button> -->
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-input
+          id="filter"
+            label="Enter your commander"
+            labelPlacement="stacked"
+            type="text"
+            placeholder="Your commander"
+            (keyup)="filter()"
+          ></ion-input>
+        </ion-item>
+        <ion-list>
+          <ion-item *ngFor="let card of filteredCards" (click)="addTile(card)">
+            <img id="{{card.id}}" src="{{card.image_uris.art_crop}}">
           </ion-item>
         </ion-list>
       </ion-content>
-    </ion-menu>
-    <ion-router-outlet id="main-content"></ion-router-outlet>
-  </ion-split-pane>
+    </ng-template>
+  </ion-modal>
 </ion-app>
