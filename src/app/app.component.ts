@@ -36,6 +36,7 @@ export class AppComponent {
     this.tiles = [];
     this.loading = true;
     this.tileCount = 0;
+    this.colCount = 0;
    }
 
   ngOnInit() {    
@@ -100,8 +101,10 @@ export class AppComponent {
     var elements = document.getElementsByTagName("img");
     var arr = Array.prototype.slice.call( elements )
     arr.forEach(item => {
-      var element = document.getElementById(item.id);
+      var element = document.getElementById(item.id);     
+      var listener = (event: any) => this.clickListener(event);
       element?.remove();
+
       element = document.getElementById("edit-"+item.id);
       element?.remove();
       element = document.getElementById("delete-"+item.id);
@@ -111,6 +114,12 @@ export class AppComponent {
     backup.forEach(tile => {
       var card = this.cards[this.cards.findIndex(f => f.id == tile.id)];
       this.addTile(card);
+      if(tile.status == "disabled")
+      {
+        var ele = document.getElementById(tile.id);
+        ele!.style.filter = "grayscale(100%)";
+        this.tiles[this.tiles.findIndex(t => t.id == tile.id)].status = "disabled";
+      }      
     });
   }
 
@@ -162,19 +171,13 @@ export class AppComponent {
     var cols = lastRow.children;
     var col = cols[this.tileCount % this.colCount];
     col.innerHTML = `<img id="${data.id}"src=\"${data.image_uris.art_crop}\"><ion-icon id="edit-${data.id}" style="position: absolute !important; right: 11px !important; top: 15px !important; font-size: 37px !important;" name="ellipsis-vertical-outline"></ion-icon><ion-icon id="delete-${data.id}" style="position: absolute !important; right: 11px !important; top: 64px !important; font-size: 37px !important;" name="trash-outline"></ion-icon>`;
-    col.addEventListener("click", (ev) => {
-      var id = (<HTMLImageElement>ev.target).id;
-      var x = document.getElementById(id);
-        if(this.tiles[this.tiles.findIndex(f => f.id == id)].status == "disabled")
-        {
-          x!.style.filter = "grayscale(0%)";
-          this.tiles[this.tiles.findIndex(f => f.id == id)].status = "enabled";
-        }
-        else {
-          x!.style.filter = "grayscale(100%)";
-          this.tiles[this.tiles.findIndex(f => f.id == id)].status = "disabled";
-        }
-    });
+    if(col.getAttribute("listener") !== "true")
+    {
+      var listener = (event: any) => this.clickListener(event);
+
+      col.addEventListener("click", listener);    
+      col.setAttribute('listener', "true");
+    }
 
     var editIcon = document.getElementById(`edit-${data.id}`);
     editIcon?.addEventListener("click", (ev) => {
@@ -193,6 +196,20 @@ export class AppComponent {
     this.tiles.push(tile);
     this.modal.dismiss(this.name, 'cancel');
     this.filteredCards = this.cards;
+  }
+
+  clickListener(ev: any) {
+      var id = (<HTMLImageElement>ev.target).id;
+      var x = document.getElementById(id);
+        if(this.tiles[this.tiles.findIndex(f => f.id == id)].status == "disabled")
+        {
+          x!.style.filter = "grayscale(0%)";
+          this.tiles[this.tiles.findIndex(f => f.id == id)].status = "enabled";
+        }
+        else {
+          x!.style.filter = "grayscale(100%)";
+          this.tiles[this.tiles.findIndex(f => f.id == id)].status = "disabled";
+        }
   }
 
     setResult(ev: any) {
