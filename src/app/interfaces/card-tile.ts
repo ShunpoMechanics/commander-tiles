@@ -5,5 +5,5 @@ export interface CardTile {
     status: string,
     wins: number,
     losses: number,
-    colors: string[]
+    colors: string
 }

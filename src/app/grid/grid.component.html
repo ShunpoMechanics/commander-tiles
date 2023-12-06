@@ -1,6 +1,51 @@
-<div id="loading" [style.display]="loading ? 'display' : 'none'">
-  <img src="../../assets/loading.gif">
-</div>
-<div id="content">
-  
-</div>
+
+    <div id="loading" [style.display]="loading ? 'display' : 'none'">
+      <img src="../../assets/loading.gif">
+    </div>
+    <div id="content" style="display: none;">
+      <ion-button id="open-modal" expand="block">Add Tile</ion-button>
+    </div>
+    <ion-grid id="grid" style="overflow-y: scroll;height:100vh">        
+      <ion-row *ngIf="!isMobile">
+        <ion-col size="3"></ion-col>
+        <ion-col size="3"></ion-col>
+        <ion-col size="3"></ion-col>
+        <ion-col size="3"></ion-col>
+      </ion-row>
+      <ion-row *ngIf="isMobile">
+        <ion-col size="6"></ion-col>
+        <ion-col size="6"></ion-col>          
+      </ion-row>
+    </ion-grid>
+<ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="cancel()">Close</ion-button>
+        </ion-buttons>
+        <ion-title>Search for your Commander</ion-title>
+        <ion-buttons slot="end">
+          <!-- <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button> -->
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item>
+        <ion-input
+        id="filter"
+          label="Enter your commander"
+          labelPlacement="stacked"
+          type="text"
+          placeholder="Your commander"
+          (keyup)="filter()"
+        ></ion-input>
+      </ion-item>
+      <ion-list>
+        <ion-item *ngFor="let card of filterCards()" (click)="addTile(card)">
+          <img id="{{card.id}}" src="{{card.image_uris.art_crop}}">
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ng-template>
+</ion-modal>
