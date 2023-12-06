@@ -46,7 +46,7 @@
           ></ion-input>
         </ion-item>
         <ion-list>
-          <ion-item *ngFor="let card of filteredCards" (click)="addTile(card)">
+          <ion-item *ngFor="let card of filterCards()" (click)="addTile(card)">
             <img id="{{card.id}}" src="{{card.image_uris.art_crop}}">
           </ion-item>
         </ion-list>

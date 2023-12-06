@@ -3,7 +3,7 @@ import { BulkData } from './interfaces/bulk-data';
 import { CardTile } from './interfaces/card-tile';
 import { HttpClient } from '@angular/common/http';
 import { Card } from './interfaces/card';
-import { IonModal } from '@ionic/angular';
+import { AlertController, IonModal } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 
 @Component({
@@ -29,7 +29,7 @@ export class AppComponent {
   name: string;
   colCount: number;
   
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private alertController: AlertController) {
     this.cards = [];
     this.filteredCards = [];
     this.bulkData = {} as BulkData;
@@ -78,6 +78,11 @@ export class AppComponent {
     });
   }
 
+  filterCards() {
+    var list = this.filteredCards.filter(value => this.tiles.findIndex(t => t.name == value.name || t.name.includes(value.name) || value.name.includes(t.name)) == -1);    
+    return list.slice(0, 100);
+  }
+
   filter() {
     var filter = <HTMLInputElement>document.getElementById("filter");
     this.filteredCards = this.cards.filter(f => f.name.toLowerCase().includes(filter.value?.toLowerCase()!));
@@ -85,6 +90,34 @@ export class AppComponent {
 
   cancel() {
     this.modal.dismiss(null, 'cancel');
+  }
+
+  redrawAllTiles() {
+    this.tileCount = 0;
+    var backup = [...this.tiles];
+    this.tiles = [];
+
+    var elements = document.getElementsByTagName("img");
+    var arr = Array.prototype.slice.call( elements )
+    arr.forEach(item => {
+      var element = document.getElementById(item.id);
+      element?.remove();
+      element = document.getElementById("edit-"+item.id);
+      element?.remove();
+      element = document.getElementById("delete-"+item.id);
+      element?.remove();
+    });
+
+    backup.forEach(tile => {
+      var card = this.cards[this.cards.findIndex(f => f.id == tile.id)];
+      this.addTile(card);
+    });
+  }
+
+  delete(id: string) {
+    var index = this.tiles.findIndex(t => t.id == id);    
+    this.tiles.splice(index, 1);
+    this.redrawAllTiles();    
   }
 
   confirm() {
@@ -102,7 +135,7 @@ export class AppComponent {
     return ( ( window.innerWidth <= 800 ));
   }
 
-  addTile(data: Card) {
+  addTile(data: Card) {    
     var grid = document.getElementById("grid");
     var rows = document.getElementsByTagName("ion-row");
     var lastRow = rows[rows.length-1];
@@ -128,7 +161,7 @@ export class AppComponent {
 
     var cols = lastRow.children;
     var col = cols[this.tileCount % this.colCount];
-    col.innerHTML = `<img id="${data.id}"src=\"${data.image_uris.art_crop}\">`;
+    col.innerHTML = `<img id="${data.id}"src=\"${data.image_uris.art_crop}\"><ion-icon id="edit-${data.id}" style="position: absolute !important; right: 11px !important; top: 15px !important; font-size: 37px !important;" name="ellipsis-vertical-outline"></ion-icon><ion-icon id="delete-${data.id}" style="position: absolute !important; right: 11px !important; top: 64px !important; font-size: 37px !important;" name="trash-outline"></ion-icon>`;
     col.addEventListener("click", (ev) => {
       var id = (<HTMLImageElement>ev.target).id;
       var x = document.getElementById(id);
@@ -143,12 +176,52 @@ export class AppComponent {
         }
     });
 
+    var editIcon = document.getElementById(`edit-${data.id}`);
+    editIcon?.addEventListener("click", (ev) => {
+
+    });
+
+    var deleteIcon = document.getElementById(`delete-${data.id}`);
+    deleteIcon?.addEventListener("click", (ev) => {
+      var id = (<HTMLImageElement>ev.target).id.substring(7);
+      var tile = this.tiles[this.tiles.findIndex(t => t.id == id)];
+      this.presentAlert(tile.name, id);
+    });
+
     this.tileCount++;   
-    var tile = { id: data.id, name: data.name, img: data.image_uris.art_crop, status: "enabled" } as CardTile;
+    var tile = { id: data.id, name: data.name, img: data.image_uris.art_crop, status: "enabled", wins: 0, losses: 0, colors: data.colors } as CardTile;
     this.tiles.push(tile);
     this.modal.dismiss(this.name, 'cancel');
+    this.filteredCards = this.cards;
   }
 
+    setResult(ev: any) {
+      // console.log(`Dismissed with role: ${ev.detail.role}`);
+    }
 
+    async presentAlert(name: string, id: string) {
+      const alert = await this.alertController.create({
+        header: 'Confirm Deletion',
+        message: `Delete ${name}? You will lose all history for this commander.`,
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {
+              this.modal.dismiss();
+            },
+          },
+          {
+            text: 'OK',
+            role: 'confirm',
+            handler: () => {
+              this.delete(id);
+            },
+          },
+        ],
+      });
+  
+      await alert.present();
+    }
  
 }
